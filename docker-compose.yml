@@ -42,7 +42,7 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_BASE: ""
+        VITE_API_BASE: https://ai-powered-image-1.onrender.com
     ports:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
