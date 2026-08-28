@@ -102,6 +102,8 @@ export default function App() {
     try {
       await signOutFromGoogle();
       setUser(null);
+      setFile(null);
+      setPreview("");
       setResult(null);
       setHistory([]);
       setHistoryError("");
@@ -135,6 +137,7 @@ export default function App() {
     return (
       <div className="page auth-page">
         <div className="auth-card card">
+          <div className="auth-badge">Secure access</div>
           <p className="eyebrow">Welcome</p>
           <h1>AI-Powered Image Quality & Defect Detection</h1>
           <p className="lede">
@@ -142,8 +145,9 @@ export default function App() {
           </p>
 
           {isFirebaseConfigured() ? (
-            <button className="primary auth-button" onClick={handleGoogleSignIn} disabled={authLoading}>
-              {authLoading ? "Signing in…" : "Continue with Google"}
+            <button className="primary auth-button google-auth-button" onClick={handleGoogleSignIn} disabled={authLoading}>
+              <span className="google-icon" aria-hidden="true">G</span>
+              <span>{authLoading ? "Signing in…" : "Continue with Google"}</span>
             </button>
           ) : (
             <div className="banner error" role="alert">
