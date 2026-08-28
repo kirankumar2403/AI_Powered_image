@@ -1,0 +1,12 @@
+.git
+.venv
+venv
+node_modules
+frontend/node_modules
+frontend/dist
+__pycache__
+*.pyc
+data/raw
+data/processed/images
+.pytest_cache
+agent-transcripts

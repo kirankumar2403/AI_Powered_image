@@ -1,0 +1,29 @@
+{
+  "model_path": "models/quality_pipeline.joblib",
+  "model_version": "1.0.0",
+  "quality_val_macro_f1": 0.7892668126260624,
+  "feature_importances": {
+    "sharpness_laplacian_var": 0.08014240543024839,
+    "edge_density": 0.07170199388697218,
+    "gradient_mean": 0.07796069980330787,
+    "brightness_mean": 0.03815581002361741,
+    "brightness_p5": 0.031094983297571346,
+    "brightness_p95": 0.03565418929884696,
+    "dark_pixel_ratio": 0.03117331257996802,
+    "bright_pixel_ratio": 0.025078178313681157,
+    "contrast_std": 0.09327657113701111,
+    "histogram_entropy": 0.03613359104515553,
+    "histogram_skew": 0.03662688428044012,
+    "noise_median_residual": 0.07990137644645574,
+    "high_freq_energy": 0.07047644549217015,
+    "saturation_mean": 0.025768928913147648,
+    "saturation_std": 0.022615835110939085,
+    "color_channel_imbalance": 0.024975301613244887,
+    "local_mean_deviation": 0.04019020066904298,
+    "tophat_residue": 0.07864381262813655,
+    "blackhat_residue": 0.04636045299580698,
+    "extreme_blob_ratio": 0.05406902703423581
+  },
+  "anomaly_threshold": -0.019331754379807664,
+  "n_estimators_quality": 220
+}

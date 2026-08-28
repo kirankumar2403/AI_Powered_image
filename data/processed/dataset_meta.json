@@ -1,0 +1,36 @@
+{
+  "source": "Procedurally generated synthetic scenes (OpenCV/NumPy), seed=42",
+  "n_originals": 140,
+  "image_size": 256,
+  "variants": [
+    "clean",
+    "blur",
+    "underexposure",
+    "overexposure",
+    "noise",
+    "severe",
+    "defect"
+  ],
+  "split_rule": "Split by original_id only; all variants of one original stay in one split",
+  "train_originals": 98,
+  "val_originals": 21,
+  "test_originals": 21,
+  "degradation": {
+    "blur": "GaussianBlur kernel 11-25, sigma 3-8",
+    "underexposure": "multiplicative scale 0.18-0.42",
+    "overexposure": "scale 1.7-2.4 plus bias 30-70, clipped",
+    "noise": "Gaussian sigma 18-42, optional 1-4% salt-pepper",
+    "severe": "blur + noise + contrast crush + optional darkening",
+    "defect": "localized scratch polyline, compact blob, or color stain"
+  },
+  "labels": {
+    "clean": "ACCEPTABLE",
+    "blur": "DEGRADED",
+    "underexposure": "DEGRADED",
+    "overexposure": "DEGRADED",
+    "noise": "DEGRADED",
+    "severe": "DEGRADED",
+    "defect": "POTENTIALLY_DEFECTIVE"
+  },
+  "seed": 42
+}
