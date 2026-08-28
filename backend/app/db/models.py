@@ -13,6 +13,8 @@ class Analysis(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    image_data: Mapped[str | None] = mapped_column(Text, nullable=True)
+    image_mime_type: Mapped[str | None] = mapped_column(String(64), nullable=True)
     quality_score: Mapped[int] = mapped_column(Integer, nullable=False)
     quality_label: Mapped[str] = mapped_column(String(64), nullable=False)
     quality_confidence: Mapped[float] = mapped_column(Float, nullable=False)

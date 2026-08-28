@@ -20,6 +20,17 @@ export default function ResultPanel({ result }) {
         <h2>Result</h2>
         <span className={labelClass(result.quality_label)}>{result.quality_label}</span>
       </div>
+
+      {result.image_data && (
+        <div className="preview-wrap">
+          <img
+            src={result.image_data}
+            alt={result.filename || "Uploaded image preview"}
+            className="preview"
+          />
+        </div>
+      )}
+
       <div className="score-row">
         <div>
           <p className="muted">Quality score</p>

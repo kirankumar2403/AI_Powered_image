@@ -19,6 +19,8 @@ class AnalysisResponse(BaseModel):
     analysis_id: str
     created_at: str | None = None
     filename: str
+    image_data: str | None = None
+    image_mime_type: str | None = None
     quality_score: int
     quality_label: str
     quality_confidence: float

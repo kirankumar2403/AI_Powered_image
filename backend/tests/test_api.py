@@ -51,12 +51,15 @@ def test_valid_image_schema_and_persistence(client, png_bytes):
         "statistics",
         "explanation",
         "quality_confidence",
+        "image_data",
+        "image_mime_type",
     ):
         assert key in body
     assert body["quality_label"] in {"ACCEPTABLE", "DEGRADED", "POTENTIALLY_DEFECTIVE"}
     assert 0 <= body["quality_score"] <= 100
     assert "sharpness" in body["statistics"]
     assert "summary" in body["explanation"]
+    assert body["image_data"].startswith("data:image/")
     analysis_id = int(body["analysis_id"])
     db = SessionLocal()
     try:

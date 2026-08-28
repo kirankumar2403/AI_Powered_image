@@ -25,7 +25,13 @@ async def analyze_image(file: UploadFile = File(...), db: Session = Depends(get_
     try:
         validate_upload(file.filename or "", file.content_type, data, settings.max_upload_bytes)
         image = decode_image(data)
-        payload = get_analysis_service().analyze(image, safe_filename(file.filename or "upload"), db)
+        payload = get_analysis_service().analyze(
+            image,
+            safe_filename(file.filename or "upload"),
+            db,
+            source_bytes=data,
+            mime_type=file.content_type or "image/png",
+        )
     except ImageValidationError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"message": exc.message, "code": exc.code}) from exc
     except HTTPException:
