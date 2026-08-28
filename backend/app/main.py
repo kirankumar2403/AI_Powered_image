@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +7,14 @@ from app.api.analyses import router as analyses_router
 from app.api.health import router as health_router
 from app.config import settings
 from app.db.session import Base, ensure_analysis_image_columns, engine
+from app.state import get_or_create_predictor
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     Base.metadata.create_all(bind=engine)
     ensure_analysis_image_columns()
+    get_or_create_predictor()
     yield
 
 

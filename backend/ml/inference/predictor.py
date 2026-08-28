@@ -45,7 +45,7 @@ class QualityPredictor:
 
     def predict(self, image_bgr: np.ndarray) -> dict[str, Any]:
         feats = extract_features(image_bgr)
-        x = np.array([[feats[n] for n in self.feature_names]], dtype=np.float64)
+        x = np.ascontiguousarray([[feats[n] for n in self.feature_names]], dtype=np.float64)
 
         quality_idx = int(self.quality_model.predict(x)[0])
         quality_proba = self.quality_model.predict_proba(x)[0]
@@ -53,15 +53,13 @@ class QualityPredictor:
         quality_conf = float(quality_proba[quality_idx])
 
         issue_proba = self.issue_model.predict_proba(x)
-        # MultiOutputClassifier returns a list of (n, 2) arrays
         issue_scores: dict[str, float] = {}
         for i, name in enumerate(self.issue_names):
             proba = issue_proba[i][0]
-            # class 1 probability if both classes exist
-            if proba.shape[0] == 2:
+            if hasattr(proba, "shape") and len(proba.shape) > 0 and proba.shape[0] >= 2:
                 issue_scores[name] = float(proba[1])
             else:
-                issue_scores[name] = float(self.issue_model.predict(x)[0][i])
+                issue_scores[name] = float(proba)
 
         anomaly_raw = float(self.anomaly_model.decision_function(x)[0])
         # IsolationForest: lower (more negative) = more anomalous
