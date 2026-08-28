@@ -77,3 +77,30 @@ def test_valid_image_schema_and_persistence(client, png_bytes):
     one = client.get(f"/api/analyses/{body['analysis_id']}")
     assert one.status_code == 200
     assert one.json()["analysis_id"] == body["analysis_id"]
+
+
+def test_user_history_is_isolated(client, png_bytes):
+    first = client.post(
+        "/api/analyze?user_id=user-a",
+        files={"file": ("user_a.png", io.BytesIO(png_bytes), "image/png")},
+    )
+    second = client.post(
+        "/api/analyze?user_id=user-b",
+        files={"file": ("user_b.png", io.BytesIO(png_bytes), "image/png")},
+    )
+
+    assert first.status_code == 200, first.text
+    assert second.status_code == 200, second.text
+
+    listed = client.get("/api/analyses?user_id=user-a")
+    assert listed.status_code == 200
+    items = listed.json()
+    assert len(items) >= 1
+    assert all(item["filename"] == "user_a.png" for item in items)
+
+    one = client.get(f"/api/analyses/{first.json()['analysis_id']}?user_id=user-a")
+    assert one.status_code == 200
+    assert one.json()["filename"] == "user_a.png"
+
+    forbidden = client.get(f"/api/analyses/{second.json()['analysis_id']}?user_id=user-a")
+    assert forbidden.status_code == 404

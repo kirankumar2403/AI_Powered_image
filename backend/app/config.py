@@ -8,7 +8,7 @@ class Settings(BaseSettings):
         protected_namespaces=(),
     )
 
-    database_url: str = "postgresql+psycopg://ai_powered_image_user:6udq8cUqH4fksEZzpXF7TX9ozs56g6q6@dpg-da8k9ebtqb8s73af9lkg-a/ai_powered_image"
+    database_url: str = "sqlite:///./ai_powered_image.db"
     model_path: str = "models/quality_pipeline.joblib"
     model_version: str = "1.0.0"
     max_upload_bytes: int = 8 * 1024 * 1024

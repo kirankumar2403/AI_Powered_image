@@ -1,4 +1,10 @@
 export default function UploadPanel({ file, preview, loading, onFile, onAnalyze }) {
+  const handleFileChange = (event) => {
+    const nextFile = event.target.files?.[0] || null;
+    onFile(nextFile);
+    event.target.value = "";
+  };
+
   return (
     <div>
       <h2>Upload</h2>
@@ -7,9 +13,9 @@ export default function UploadPanel({ file, preview, loading, onFile, onAnalyze 
         <input
           type="file"
           accept="image/jpeg,image/png,image/bmp,image/webp"
-          onChange={(e) => onFile(e.target.files?.[0] || null)}
+          onChange={handleFileChange}
         />
-        <span>{file ? file.name : "Choose image"}</span>
+        <span>Choose image</span>
       </label>
       {preview && (
         <div className="preview-wrap">

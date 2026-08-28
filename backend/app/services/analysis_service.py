@@ -30,6 +30,7 @@ class AnalysisService:
         db: Session,
         source_bytes: bytes | None = None,
         mime_type: str | None = None,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         try:
             result = self.predictor.predict(image_bgr)
@@ -44,6 +45,7 @@ class AnalysisService:
 
         explanation = build_explanation(result)
         record = Analysis(
+            user_id=user_id,
             filename=filename,
             image_data=image_data,
             image_mime_type=image_mime,
@@ -69,6 +71,7 @@ def serialize_analysis(record: Analysis) -> dict[str, Any]:
         created = created.replace(tzinfo=timezone.utc)
     return {
         "analysis_id": str(record.id),
+        "user_id": record.user_id,
         "created_at": created.isoformat() if created else None,
         "filename": record.filename,
         "image_data": record.image_data,
@@ -91,6 +94,7 @@ def serialize_summary(record: Analysis) -> dict[str, Any]:
         created = created.replace(tzinfo=timezone.utc)
     return {
         "analysis_id": str(record.id),
+        "user_id": record.user_id,
         "created_at": created.isoformat() if created else datetime.now(timezone.utc).isoformat(),
         "filename": record.filename,
         "quality_score": record.quality_score,
