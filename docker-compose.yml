@@ -23,7 +23,7 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-iqd}:${POSTGRES_PASSWORD:-iqd}@postgres:5432/${POSTGRES_DB:-image_quality}
       MODEL_PATH: /app/models/quality_pipeline.joblib
       MODEL_VERSION: ${MODEL_VERSION:-1.0.0}
-      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-8388608}
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-4194304}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,http://127.0.0.1:5173}
     ports:
       - "${BACKEND_PORT:-8000}:8000"

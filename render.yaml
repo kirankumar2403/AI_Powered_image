@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ai-powered-image
+    env: python
+    plan: starter
+    buildCommand: |
+      python -m pip install --upgrade pip
+      python -m pip install --no-cache-dir -r backend/requirements.txt
+    startCommand: |
+      cd backend && WEB_CONCURRENCY=1 gunicorn app.main:app --config gunicorn.conf.py
+    envVars:
+      - key: PYTHONPATH
+        value: backend
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: PORT
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
