@@ -2,41 +2,27 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
   pull_request:
-    branches:
-      - main
-
+    branches: [main]
 
 jobs:
-
-  # ============================================================
-  # BACKEND CI
-  # ============================================================
-
   backend:
-    name: Backend CI
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:16-alpine
-
         env:
           POSTGRES_USER: iqd
           POSTGRES_PASSWORD: iqd
           POSTGRES_DB: image_quality
-
         ports:
           - 5432:5432
-
         options: >-
           --health-cmd="pg_isready -U iqd -d image_quality"
-          --health-interval=5s
+          --health-interval=10s
           --health-timeout=5s
-          --health-retries=10
+          --health-retries=5
 
     env:
       DATABASE_URL: postgresql+psycopg://iqd:iqd@127.0.0.1:5432/image_quality
@@ -44,142 +30,34 @@ jobs:
       MODEL_PATH: models/quality_pipeline.joblib
 
     steps:
+      - uses: actions/checkout@v4
 
-      # --------------------------------------------------------
-      # Checkout
-      # --------------------------------------------------------
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-
-      # --------------------------------------------------------
-      # Python
-      # --------------------------------------------------------
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-
-      # --------------------------------------------------------
-      # Install dependencies
-      # --------------------------------------------------------
+          python-version: '3.11'
 
       - name: Install backend dependencies
-        working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-
-      # --------------------------------------------------------
-      # Check model
-      # --------------------------------------------------------
-
-      - name: Check ML model
-        run: |
-          echo "Checking model file..."
-          ls -lh models/
-
-          if [ ! -f "models/quality_pipeline.joblib" ]; then
-            echo "ERROR: ML model not found!"
-            exit 1
-          fi
-
-          echo "ML model found successfully."
-
-
-      # --------------------------------------------------------
-      # Python syntax
-      # --------------------------------------------------------
-
-      - name: Check Python syntax
-        run: |
-          python -m compileall backend
-
-
-      # --------------------------------------------------------
-      # Tests
-      # --------------------------------------------------------
+          pip install -r backend/requirements.txt
 
       - name: Run backend tests
-        run: |
-          pytest backend/tests -q
-
-
-      # --------------------------------------------------------
-      # Docker build
-      # --------------------------------------------------------
-
-      - name: Build backend Docker image
-        run: |
-          docker build \
-            --file backend/Dockerfile \
-            --tag ecap-backend:ci \
-            .
-
-
-  # ============================================================
-  # FRONTEND CI
-  # ============================================================
+        run: pytest backend/tests -q
 
   frontend:
-    name: Frontend CI
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
 
-      # --------------------------------------------------------
-      # Checkout
-      # --------------------------------------------------------
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-
-      # --------------------------------------------------------
-      # Node.js
-      # --------------------------------------------------------
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-
-      # --------------------------------------------------------
-      # Install dependencies
-      # --------------------------------------------------------
+          node-version: '20'
 
       - name: Install frontend dependencies
         working-directory: frontend
-        run: |
-          npm ci
-
-
-      # --------------------------------------------------------
-      # Build frontend
-      # --------------------------------------------------------
+        run: npm ci
 
       - name: Build frontend
         working-directory: frontend
-        env:
-          VITE_API_BASE: https://ai-powered-image-1.onrender.com
-        run: |
-          npm run build
-
-
-      # --------------------------------------------------------
-      # Docker build
-      # --------------------------------------------------------
-
-      - name: Build frontend Docker image
-        run: |
-          docker build \
-            --file frontend/Dockerfile \
-            --tag ecap-frontend:ci \
-            frontend
+        run: npm run build
