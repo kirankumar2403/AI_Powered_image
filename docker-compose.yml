@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-iqd}:${POSTGRES_PASSWORD:-iqd}@postgres:5432/${POSTGRES_DB:-image_quality}
+      DATABASE_URL: postgresql+psycopg://ai_powered_image_user:6udq8cUqH4fksEZzpXF7TX9ozs56g6q6@dpg-da8k9ebtqb8s73af9lkg-a/ai_powered_image
       MODEL_PATH: /app/models/quality_pipeline.joblib
       MODEL_VERSION: ${MODEL_VERSION:-1.0.0}
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-8388608}
