@@ -4,6 +4,44 @@ Full-stack internship assessment application: upload an image, extract computer-
 
 No external AI or cloud vision APIs are used. Inference runs entirely inside this repository.
 
+## 🚀 Live Demo
+Live Application:
+https://ai-powered-image-zlzr.onrender.com/
+
+Upload an image and the application will analyze:
+- Blur / insufficient sharpness
+- Underexposure
+- Overexposure
+- Image noise
+- Severe degradation
+- Potential visual defects
+
+## 🎯 Assessment Coverage
+
+| Requirement | Implementation |
+|---|---|
+| Image upload and analysis | React + FastAPI |
+| Blur detection | Laplacian variance + issue RF |
+| Underexposure | Brightness + dark-pixel ratio + issue RF |
+| Overexposure | Brightness + bright-pixel ratio + issue RF |
+| Image noise | Median residual + high-frequency energy + issue RF |
+| Corruption | Image decoding validation + HTTP 400 |
+| Severe degradation | Quality RF + severe degradation issue |
+| Potential visual defect | Synthetic scratch/blob/stain detection + Isolation Forest |
+| AI/ML decision component | Random Forest + Isolation Forest |
+| Computer-vision features | 20 engineered image-quality features |
+| REST API | FastAPI |
+| Database | PostgreSQL |
+| Analysis history | PostgreSQL + REST API |
+| Explainability | Statistics + feature importance + confidence |
+| Evaluation | Accuracy, precision, recall, F1, ROC-AUC, confusion matrix |
+| Unseen evaluation | Original-ID based train/validation/test split |
+| Frontend | React + Vite |
+| Containerization | Docker + Docker Compose |
+| Online deployment | Render |
+| Health endpoint | `/health` |
+| Automated tests | Pytest + Vitest |
+
 ## Project overview
 
 Photograph and scan pipelines fail for predictable visual reasons: blur, bad exposure, noise, file corruption, and localized defects. This project turns those signals into:
@@ -47,18 +85,52 @@ Given a user-uploaded image, the system must:
 
 ## Architecture
 
-```
-USER → React (Vite) → FastAPI → validate/decode
-     → OpenCV/NumPy features → Random Forest inference
-     → explanation → PostgreSQL → JSON → UI
 
-History: React → GET /api/analyses → PostgreSQL → History UI
+                    ┌─────────────────┐
+                    │      User       │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │   React + Vite  │
+                    └────────┬────────┘
+                             │
+                    Image Upload
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ FastAPI Backend │
+                    └────────┬────────┘
+                             │
+                    Validate / Decode
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │ OpenCV + NumPy  │
+                    │ Feature Extract │
+                    └────────┬────────┘
+                             │
+                             ▼
+              ┌──────────────────────────────┐
+              │      ML Inference            │
+              │                              │
+              │ Quality Random Forest        │
+              │ Issue Random Forest          │
+              │ Isolation Forest             │
+              └──────────────┬───────────────┘
+                             │
+                             ▼
+              ┌──────────────────────────────┐
+              │ Score + Issues + Explanation │
+              └──────────────┬───────────────┘
+                             │
+                  ┌──────────┴──────────┐
+                  ▼                     ▼
+          ┌──────────────┐       ┌────────────┐
+          │  PostgreSQL  │       │ React UI   │
+          │   History    │       │   Result   │
+          └──────────────┘       └────────────┘
 
-Docker Compose
-  ├── frontend (nginx + built React; proxies /api and /health)
-  ├── backend  (FastAPI + OpenCV + sklearn + trained model)
-  └── postgres
-```
 
 ## Technology stack
 
@@ -68,7 +140,7 @@ Docker Compose
 - ML: scikit-learn Random Forest (primary), Isolation Forest (supporting)
 - DB: PostgreSQL, SQLAlchemy, psycopg3
 - Tests: Pytest, Vitest
-- Deploy: Docker, Docker Compose
+- Deploy: Docker, Docker Compose, Render
 
 ## Computer vision features
 
@@ -143,6 +215,35 @@ Every degraded twin of an original stays in the same split.
 ## Data leakage prevention
 
 `scripts/generate_dataset.py` assigns `split` on `original_id` only. Training never sees a blur/noise/defect version of a test original.
+
+## 🤖 AI / ML Approach
+
+The application uses trained machine-learning models for the final quality
+decision rather than relying solely on hard-coded computer-vision rules.
+
+### Models
+
+- **Quality Random Forest:** 3-class classification:
+  `ACCEPTABLE`, `DEGRADED`, `POTENTIALLY_DEFECTIVE`
+- **Issue Random Forest:** Multi-output classifier for the six issue types
+- **Isolation Forest:** Supporting anomaly detector trained on non-defect
+  training samples
+
+### Input
+
+The models operate on a 20-dimensional engineered image-quality feature
+vector extracted using OpenCV and NumPy.
+
+### Training
+
+The models are trained offline using the generated dataset. The trained
+pipeline is saved as:
+
+`models/quality_pipeline.joblib`
+
+At inference time, the trained model is loaded by the backend and used to
+generate predictions for uploaded images.
+
 
 ## ML model selection
 
@@ -239,6 +340,25 @@ Uses the **unseen test originals** only (`split=test`, 21 originals, 147 images)
 
 Full dump: `reports/evaluation.json`.
 
+### 📊 Key Evaluation Results
+
+Evaluation was performed on 147 unseen test images from 21 original
+images that were not used during training.
+
+| Metric | Result |
+|---|---:|
+| Accuracy | **89.1%** |
+| Macro Precision | **75.4%** |
+| Macro Recall | **74.6%** |
+| Macro F1 | **74.7%** |
+
+The evaluation also includes per-class F1, confusion matrix, per-issue
+precision/recall/F1, ROC-AUC for issue detection, failure cases, and
+uncertain predictions.
+
+
+
+
 ## Actual evaluation results (unseen test)
 
 Generated by `scripts/evaluate_model.py` on 2026-08-27. Do not treat these as real-camera production metrics.
@@ -285,7 +405,7 @@ Geometric shapes in clean scenes can look like blobs/scratches to local-anomaly 
 
 Confidence &lt; 0.55: **3** test images (see `reports/evaluation.json`). Low confidence is reported honestly rather than forced.
 
-## Limitations
+## Limitations & Generalization
 
 - Training images are **synthetic**, not camera captures or a public defect dataset (for example NEU-DET). Global quality cues transfer better than defect cues.
 - `POTENTIALLY_DEFECTIVE` is a **narrow** definition (scratches, blobs, stains in this generator).
@@ -497,11 +617,27 @@ npm test
 
 ## Deployment instructions
 
-1. Copy `.env.example` → `.env` and set a strong `POSTGRES_PASSWORD` in production.
-2. Ensure `models/quality_pipeline.joblib` exists (train or copy).
-3. `docker compose up --build -d`
-4. Confirm `curl http://localhost:8000/health` and the UI on port 8080.
-5. Restrict CORS to the real frontend origin.
+## 🚀 Deployment
+
+### Live Deployment
+
+The application is deployed on Render.
+
+**Live Application:**  
+https://ai-powered-image-zlzr.onrender.com/
+
+### Docker Compose Deployment
+
+The complete application can also be run locally using Docker Compose.
+
+1. Copy `.env.example` → `.env`
+2. Set a strong `POSTGRES_PASSWORD`
+3. Ensure `models/quality_pipeline.joblib` exists
+4. Start the services:
+
+```bash
+docker compose up --build -d
+```
 
 ## Project structure
 
@@ -538,3 +674,12 @@ docker-compose.yml
 | React UI | upload, preview, result, history | `frontend/src/` | Vitest + http://localhost:8080 |
 | Docker Compose | frontend, backend, postgres | `docker-compose.yml` | `docker compose ps` healthy |
 | Tests | Pytest + Vitest | `backend/tests/`, `frontend/src/App.test.jsx` | 12 passed / 2 passed |
+
+## ⭐ Optional / Bonus Features
+### Implemented
+- Model versioning
+- Automated backend tests
+- Automated frontend tests
+- CI/CD workflow
+
+
